@@ -111,6 +111,13 @@ The submission model is provided at the path
 ```
 model/cnn_grad_clipped.pth
 ```
+To load the model, run 
 
+```
+from cnn import FontClassifierCNN
+import torch
+model = FontClassifierCNN()
+model.load_state_dict(torch.load('model/cnn_grad_clipped.pth'))
+```
 
 
