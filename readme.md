@@ -6,7 +6,7 @@ The dataset is split into training, validation, and testing sets to ensure the m
 
 ### Data Transformation and DataLoader Setup
 
-To prepare the images for training and validation, I apply a series of transformations to standardize and augment mydataset. This ensures that mymodel learns to generalize well and not just memorize the specific details of the training images. The transformations include:
+To prepare the images for training and validation, I apply a series of transformations to standardize and augment mydataset. This ensures that my model learns to generalize well and not just memorize the specific details of the training images. The transformations include:
 
 - Resizing all images to 128x128 pixels.
 - Randomly flipping images horizontally to introduce variability.
