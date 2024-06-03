@@ -49,8 +49,14 @@ This architecture is tailored to capture the intricate details necessary for dis
 The training process involves several techniques to optimize performance and ensure stable convergence:
 
 - **Model Architecture**: I use a custom convolutional neural network (CNN) designed for font classification, termed `FontClassifierCNN`.
-- **Loss Function**: I employ CrossEntropyLoss, which is well-suited for multi-class classification tasks, ensuring that my model accurately learns to distinguish between different font types.
 - **Optimizer**: The Adam optimizer is used with an initial learning rate of 0.001. Adam is chosen for its effectiveness in handling sparse gradients on noisy problems.
+
+### Loss Function
+
+The choice of CrossEntropyLoss as the loss function is pivotal for the following reasons:
+
+- **Suitability for Classification**: CrossEntropyLoss is specifically designed for classification tasks where each instance is expected to belong to a single class out of multiple classes. This makes it ideal for the font classification task, which involves distinctly categorizing each image into one of several font types.
+- **Probabilistic Interpretation**: This loss function measures the performance of a classification model whose output is a probability value between 0 and 1. CrossEntropyLoss penalizes the probability based on the distance from the actual label, promoting more confident and accurate predictions.
 
 ### Training Enhancements
 
