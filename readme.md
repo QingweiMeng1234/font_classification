@@ -99,7 +99,7 @@ Accuracy is calculated by comparing the predicted labels against the true labels
 
 The formula used is:
 
-\[ \text{Accuracy} = \left( \frac{\text{Correct Predictions}}{\text{Total Predictions}} \right) \times 100 \]
+$\text{Accuracy} = \frac{\text{Correct Predictions}}{\text{Total Predictions}} \times 100$
 
 ### Result
 
