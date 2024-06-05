@@ -1,5 +1,6 @@
 # Font Classifier Project Documentation
 
+
 ## How to Run the Project for Submission
 
 The model for submission is saved at 
@@ -37,6 +38,7 @@ The data preparation for the Font Classifier project consists of two main steps:
 
 ### Generating Synthetic Data (`generate_fonts.py`)
 
+
 To create a diverse and extensive dataset, the `generate_fonts.py` script generates synthetic images of text using various fonts. This process ensures a broad representation of styles, improving the model's generalization capabilities.
 
 #### Key Features of the Script:
@@ -44,6 +46,7 @@ To create a diverse and extensive dataset, the `generate_fonts.py` script genera
 - **Font Handling**: Utilizes TrueType fonts (.ttf files) located in a designated `fonts` folder, generating a specified number of images for each font.
 - **Dynamic Text Sizing**: Adjusts font size dynamically to ensure the text fits within the image dimensions, starting from 50% of the image height and decreasing as necessary.
 - **Image Customization**: Adds deep black shadows along the edges of the images to introduce variations and complexities that the model might encounter in real-world scenarios, this is inspired from the sample_eval_data given. 
+
 
 #### Output:
 The script saves the generated images in a structured directory format, with separate folders for each font type, containing the respective images.
@@ -89,8 +92,10 @@ The experience with the CNN model highlighted the need for a more complex and ca
 
 ### ResNet-50 Model Setup
 
+
 #### Pre-trained Model
 Leveraging a pre-trained ResNet-50 provided a robust starting point due to its prior training on a large dataset.
+
 
 #### Modifications
 The final fully connected layer was replaced to adapt to my 10-class font classification problem.
@@ -101,11 +106,13 @@ The SGD optimizer was used with a learning rate of 0.001 and momentum of 0.9.
 #### Loss Function
 CrossEntropyLoss was used for its effectiveness in multi-class classification.
 
+
 ### Training Process
 Training was conducted over 15 epochs with real-time augmentation applied to the input data to enhance generalization:
 
 1. **Epoch Execution**: Each epoch involved a forward pass, loss computation, backpropagation, and parameter updates.
 2. **Validation Accuracy**: Post each epoch, validation accuracy was computed to monitor performance and adjust training strategies if necessary.
+
 
 The model achieved an accuracy of approximately 82% on the validation set by the end of the training process, demonstrating significant improvements over the initial model.
 
