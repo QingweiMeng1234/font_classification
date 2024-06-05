@@ -45,3 +45,10 @@ source_folder = 'data'  # Update this path
 target_folder = 'datas'  # Update this path
 
 split_data(source_folder, target_folder)
+
+if os.path.exists(source_folder) and os.path.isdir(source_folder):
+    # Remove the source folder and all its contents
+    shutil.rmtree(source_folder)
+
+# Rename 'datas' to 'data'
+os.rename(target_folder, source_folder)
