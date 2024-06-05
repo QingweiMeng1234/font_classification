@@ -20,6 +20,8 @@ model.fc = torch.nn.Linear(num_ftrs, 10)
 model_path = 'model/Resnet_best.pth'
 model.load_state_dict(torch.load(model_path, map_location=device))
 model.to(device)
+test_dataset = datasets.ImageFolder(root='your_data_path', transform=transform)
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 ```
 
 To run the final results from scratch, if you have not split the data into train,validation, and test dataset., run 
