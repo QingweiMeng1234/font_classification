@@ -1,55 +1,77 @@
+# Font Classifier Project Documentation
+
+
+## How to Run the Project for Submission
+
+The model for submission is saved at 
+```
+model/Resnet_best.pth
+```
+To load the model, run:
+```
+import torch 
+from augmentation import augs
+from torchvision import models
+transform = augs()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model = models.resnet50(pretrained=True)
+num_ftrs = model.fc.in_features
+model.fc = torch.nn.Linear(num_ftrs, 10)
+model_path = 'model/Resnet_best.pth'
+model.load_state_dict(torch.load(model_path, map_location=device))
+model.to(device)
+```
+
+To run the final results from scratch, if you have not split the data into train,validation, and test dataset., run 
+```
+split_data.py
+```
+Then run the Resnet.ipynb to train the pretrained ResNet-50 Model and make predictions on sample_eval_data. 
+
+
+## Overview
+This document outlines the development process, architectural decisions, and evaluation of the Font Classifier project, aimed at classifying different fonts from images using deep learning techniques.
+
 ## Data Preparation
 
-### Splitting the Data
+The data preparation for the Font Classifier project consists of two main steps: generating synthetic data and splitting the data into appropriate sets for training, validation, and testing. Below, I describe these steps in detail, utilizing custom Python scripts.
 
-The dataset is split into training, validation, and testing sets to ensure the model trains effectively and generalizes well on unseen data. I use a script to divide the data into a 70% training set, 15% validation set, and 15% testing set. This process shuffles the data and ensures that each subset contains a representative distribution of each font class, which is crucial for maintaining the integrity of my model's evaluation.
-
-### Data Transformation and DataLoader Setup
-
-To prepare the images for training and validation, I apply a series of transformations to standardize and augment mydataset. This ensures that my model learns to generalize well and not just memorize the specific details of the training images. The transformations include:
-
-- Resizing all images to 128x128 pixels.
-- Randomly flipping images horizontally to introduce variability.
-- Randomly rotating images by up to 20 degrees to simulate different orientations.
-- Converting images to tensors for model processing.
-- Normalizing images with a predefined mean and standard deviation, which aligns with common practice for image data.
-
-For the DataLoader setup:
-
-- **Training DataLoader**: Shuffles the data to prevent the model from learning any order-dependent patterns in the data, which helps to improve the generalization capabilities of the model.
-- **Validation DataLoader**: Does not shuffle the data, as the order does not affect validation performance but ensures consistent results across different runs.
-
-## Model Architecture
-
-My model, `FontClassifierCNN`, utilizes a convolutional neural network (CNN) designed to accurately classify different fonts from images. Below is a description of the model's architecture:
-
-### Convolutional Layers
-
-- **Conv1**: First convolutional layer with 16 filters of size 5x5 and padding set to 2. This is followed by ReLU activation and a 2x2 max pooling operation.
-- **Conv2**: Second convolutional layer with 32 filters of size 5x5 and padding set to 2, followed by ReLU activation and a 2x2 max pooling.
-- **Conv3**: Third convolutional layer with 64 filters of size 3x3 and padding set to 1, followed by ReLU activation and a 2x2 max pooling.
-- **Conv4**: Fourth convolutional layer with 128 filters of size 3x3 and padding set to 1, followed by ReLU activation and a 2x2 max pooling.
-- **Conv5**: Fifth convolutional layer with 256 filters of size 3x3 and padding set to 1, followed by ReLU activation and a 2x2 max pooling.
-
-### Fully Connected Layers
-
-- **FC1**: First fully connected layer with 4096 input features, reduced to 1024 features, coupled with ReLU activation.
-- **FC2**: Second fully connected layer reduces the feature size from 1024 to 128, using ReLU activation.
-- **FC3**: The final fully connected layer maps 128 features to 10 output classes, corresponding to the 10 different fonts we aim to classify.
-
-### Forward Pass
-
-During the forward pass, the image data is processed through sequential convolutional layers, which are designed to extract and amplify features relevant to font recognition. After passing through multiple pooling and ReLU activation layers to reduce dimensionality and introduce non-linearity, the data is flattened and passed through fully connected layers. The output from the final layer provides the classification scores for each font.
-
-This architecture is tailored to capture the intricate details necessary for distinguishing between various font styles, ensuring high accuracy and robustness in font classification.
+### Generating Synthetic Data (`generate_fonts.py`)
 
 
-## Model Training
+To create a diverse and extensive dataset, the `generate_fonts.py` script generates synthetic images of text using various fonts. This process ensures a broad representation of styles, improving the model's generalization capabilities.
 
-The training process involves several techniques to optimize performance and ensure stable convergence:
+#### Key Features of the Script:
+- **Random Text**: Generates random strings of varying lengths, including letters, digits, and punctuation, with a preference for more spaces to mimic natural text spacing.
+- **Font Handling**: Utilizes TrueType fonts (.ttf files) located in a designated `fonts` folder, generating a specified number of images for each font.
+- **Dynamic Text Sizing**: Adjusts font size dynamically to ensure the text fits within the image dimensions, starting from 50% of the image height and decreasing as necessary.
+- **Image Customization**: Adds deep black shadows along the edges of the images to introduce variations and complexities that the model might encounter in real-world scenarios, this is inspired from the sample_eval_data given. 
 
-- **Model Architecture**: I use a custom convolutional neural network (CNN) designed for font classification, termed `FontClassifierCNN`.
-- **Optimizer**: The Adam optimizer is used with an initial learning rate of 0.001. Adam is chosen for its effectiveness in handling sparse gradients on noisy problems.
+
+#### Output:
+The script saves the generated images in a structured directory format, with separate folders for each font type, containing the respective images.
+
+### Splitting Data (`split_data.py`)
+
+Once a substantial dataset is generated, it is crucial to split this data into training, validation, and test sets to ensure robust model training and evaluation.
+
+#### Process:
+- **Directory Setup**: Ensures that directories for training, validation, and test sets are created for each class (font type).
+- **Shuffling and Splitting**: Shuffles the images within each class and splits them according to predefined ratios: 70% for training, 15% for validation, and 15% for testing.
+- **File Management**: Moves files into the respective directories and cleans up the original dataset directory to maintain a tidy environment.
+
+#### Result:
+This script organizes the data into a structure that is conducive to the training process, facilitating straightforward access and management during model training and evaluation.
+
+By combining these scripts, the project efficiently manages a large volume of synthetic data, simulating a variety of fonts and text scenarios, thus enhancing the classifier’s ability to recognize and differentiate between font styles effectively.
+
+
+## Model Architecture and Training
+
+### Initial CNN Model
+
+#### Model Description
+The initial model, `FontClassifierCNN`, was a custom convolutional neural network designed specifically for font classification. It featured several convolutional and pooling layers, followed by fully connected layers aimed at reducing the input dimensions to classify 10 different font types.
 
 ### Loss Function
 
@@ -58,72 +80,41 @@ The choice of CrossEntropyLoss as the loss function is pivotal for the following
 - **Suitability for Classification**: CrossEntropyLoss is specifically designed for classification tasks where each instance is expected to belong to a single class out of multiple classes. This makes it ideal for the font classification task, which involves distinctly categorizing each image into one of several font types.
 - **Probabilistic Interpretation**: This loss function measures the performance of a classification model whose output is a probability value between 0 and 1. CrossEntropyLoss penalizes the probability based on the distance from the actual label, promoting more confident and accurate predictions.
 
-### Training Enhancements
+#### Training and Performance
+The CNN was trained using a similar data augmentation strategy to introduce robustness against overfitting. However, despite optimizations, it achieved a maximum accuracy of 48% on the validation set. This performance indicated potential underfitting and limitations in the model’s capacity to capture the complex features necessary for accurate font classification.
 
-- **Learning Rate Scheduler**: A decaying learning rate is applied to address significant fluctuations in the loss towards the final training steps, helping the model converge smoothly towards the end of training.
-- **Gradient Clipping**: To prevent the exploding gradients problem, I clip gradients to a maximum norm of 1.0, which helps in faster and more stable convergence.
+#### Challenges Encountered
+- **Complexity Limitations**: The model might not have had sufficient depth or complexity to learn the nuanced differences between various fonts.
+- **Overfitting to Noise**: Despite augmentation, the model might have overfitted to noise within the training data rather than generalizing from it.
+
+#### Lessons Learned
+The experience with the CNN model highlighted the need for a more complex and capable architecture, leading to the adoption of ResNet-50, which substantially improved the classification accuracy.
+
+### ResNet-50 Model Setup
+
+
+#### Pre-trained Model
+Leveraging a pre-trained ResNet-50 provided a robust starting point due to its prior training on a large dataset.
+
+
+#### Modifications
+The final fully connected layer was replaced to adapt to my 10-class font classification problem.
+
+#### Optimizer
+The SGD optimizer was used with a learning rate of 0.001 and momentum of 0.9.
+
+#### Loss Function
+CrossEntropyLoss was used for its effectiveness in multi-class classification.
+
 
 ### Training Process
+Training was conducted over 15 epochs with real-time augmentation applied to the input data to enhance generalization:
 
-The model is trained over 100 epochs with the following steps per epoch:
-1. **Training Phase**:
-   - Each batch of the training data is forwarded through the model to compute the loss.
-   - Backpropagation is performed, and model weights are updated.
-   - Training loss is logged to monitor progress.
-
-2. **Validation Phase**:
-   - The model is set to evaluation mode (`.eval()`), which disables dropout and batch normalization layers for consistent performance metrics.
-   - Validation data is used to compute loss and accuracy, providing insight into how well the model generalizes to unseen data.
-
-### Performance Monitoring
-
-- Loss and accuracy are recorded for each epoch, both to trace training progress and to intervene if needed (e.g., early stopping if validation performance degrades).
-
-## Model Evaluation
-
-To assess the performance of my trained model, `FontClassifierCNN`, on unseen data, we conduct an evaluation using the test dataset. This dataset is not used during the training process and provides an objective measure of how well my model generalizes.
-
-### Test Dataset and DataLoader
-
-The test dataset is prepared with the same image transformations as the training and validation datasets. It is loaded using a `DataLoader` that processes the images in batches of 32 without shuffling, as the order does not impact the performance evaluation.
-
-### Evaluation Process
-
-The model loaded with weights from the best-performing model during validation (`cnn_grad_clipped.pth`) is set to evaluation mode. This disables layers like dropout and batch normalization that behave differently during training versus testing.
-
-We use a loop to process each batch from the test DataLoader, where:
-- **Images** are forwarded through the model to generate predictions.
-- **Predictions** are compared to the actual labels to determine correctness.
-
-Gradient computations are disabled (`torch.no_grad()` context) to reduce memory usage and speed up the computations, as gradients are not needed for model evaluation.
-
-### Accuracy Calculation
-
-Accuracy is calculated by comparing the predicted labels against the true labels across all test samples:
-- **Correct Predictions**: Number of times the model predictions match the labels.
-- **Total Predictions**: Total number of images processed.
-
-The formula used is:
-
-$\text{Accuracy} = \frac{\text{Correct Predictions}}{\text{Total Predictions}} \times 100$
-
-### Result
-
-After running the evaluation, the accuracy of the model on the test data is 95.24%
-
-## Submission
-The submission model is provided at the path
-
-```
-model/cnn_grad_clipped.pth
-```
-To load the model, run 
-
-```
-from cnn import FontClassifierCNN
-import torch
-model = FontClassifierCNN()
-model.load_state_dict(torch.load('model/cnn_grad_clipped.pth'))
-```
+1. **Epoch Execution**: Each epoch involved a forward pass, loss computation, backpropagation, and parameter updates.
+2. **Validation Accuracy**: Post each epoch, validation accuracy was computed to monitor performance and adjust training strategies if necessary.
 
 
+The model achieved an accuracy of approximately 82% on the validation set by the end of the training process, demonstrating significant improvements over the initial model.
+
+## Conclusion
+The implementation of the ResNet-50 model has markedly enhanced my project's capability to accurately classify fonts from images. The architectural advantages of ResNet, combined with strategic training approaches, have culminated in a robust model that significantly outperforms the initial setup. The result has achieved 96% accuracy on the test data provided.
